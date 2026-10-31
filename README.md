@@ -1,6 +1,6 @@
 # Turning order updates into searchable vectors
 
-We treat each order update as the unit of meaning, then split its receipt-like lines into small chunks. Infrai gives that pipeline one key and an OpenAI-compatible `base_url`; the example computes embeddings and upserts vectors with order metadata into a caller-owned collection. This keeps the ingest idempotent: re-running a packed order just re-upserts the same vectors.
+The pragmatic call is to treat the order update as the unit of meaning, then split its receipt-like lines into small chunks. Infrai gives that pipeline one key and an OpenAI-compatible `base_url`; the example below computes embeddings and upserts vectors with order metadata into a caller-owned collection.
 
 ## Runnable path
 
@@ -10,7 +10,7 @@ Set `INFRAI_API_KEY` and `INFRAI_COLLECTION` to an existing 1536-dimensional col
 python -m src.order_ingest
 ```
 
-The script models a packed order and prints the server's upsert acknowledgement. It does not create a collection because the supplied vector capability surface has no collection-delete operation; collection lifecycle remains with the caller. That boundary saved us a postmortem once when a retry tried to nuke a shared index.
+The script models a packed order and prints the server's upsert acknowledgement. It does not create a collection, because the supplied vector capability surface has no collection-delete operation. Collection lifecycle stays with the caller.
 
 ## What the code makes explicit
 
@@ -24,7 +24,7 @@ The focused test names its input and expected result: a packed order with three 
 python -m pytest -q
 ```
 
-The service is intentionally small: add a web handler around `ingest` when your application needs HTTP request validation, while retaining the same order-shaped model and vector payload. Run the test in CI so a missed chunk surfaces before it pages someone.
+The service is intentionally small. Add a web handler around `ingest` when your app needs HTTP request validation, while keeping the same order-shaped model and vector payload.
 
 ## Production notes: Ecommerce Order Vector Ingest
 
